@@ -70,7 +70,11 @@ def restore_users(
             else:
                 log.error("Failed to create user %s: %s", new_dn, conn.result["description"])
         except Exception as exc:
-            log.error("Error creating user %s: %s", new_dn, exc)
+            if "entryAlreadyExists" in str(exc):
+                dn_map[user.distinguished_name] = new_dn
+                log.warning("User already exists, skipping: %s", new_dn)
+            else:
+                log.error("Error creating user %s: %s", new_dn, exc)
 
     log.info("Restored %d / %d users", len(dn_map), len(users))
     return dn_map

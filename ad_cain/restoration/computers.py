@@ -52,7 +52,11 @@ def restore_computers(
             else:
                 log.error("Failed to create computer %s: %s", new_dn, conn.result["description"])
         except Exception as exc:
-            log.error("Error creating computer %s: %s", new_dn, exc)
+            if "entryAlreadyExists" in str(exc):
+                dn_map[comp.distinguished_name] = new_dn
+                log.warning("Computer already exists, skipping: %s", new_dn)
+            else:
+                log.error("Error creating computer %s: %s", new_dn, exc)
 
     log.info("Restored %d / %d computers", len(dn_map), len(computers))
     return dn_map

@@ -50,8 +50,12 @@ def restore_gpos(
                 log.error("Failed to create GPO %s: %s", new_dn, conn.result["description"])
                 continue
         except Exception as exc:
-            log.error("Error creating GPO %s: %s", new_dn, exc)
-            continue
+            if "entryAlreadyExists" in str(exc):
+                dn_map[gpo.distinguished_name] = new_dn
+                log.warning("GPO already exists, skipping: %s", new_dn)
+            else:
+                log.error("Error creating GPO %s: %s", new_dn, exc)
+                continue
 
         # Write GPT files to SYSVOL
         if sysvol_root and gpo.gpt_content.files:

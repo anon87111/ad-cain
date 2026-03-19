@@ -61,7 +61,11 @@ def restore_groups(
             else:
                 log.error("Failed to create group %s: %s", new_dn, conn.result["description"])
         except Exception as exc:
-            log.error("Error creating group %s: %s", new_dn, exc)
+            if "entryAlreadyExists" in str(exc):
+                group_dn_map[grp.distinguished_name] = new_dn
+                log.warning("Group already exists, skipping: %s", new_dn)
+            else:
+                log.error("Error creating group %s: %s", new_dn, exc)
 
     # Merge into master dn_map
     dn_map.update(group_dn_map)
@@ -89,8 +93,11 @@ def restore_groups(
                     log.warning("Could not add member %s to %s: %s",
                                 new_member_dn, new_group_dn, conn.result["description"])
             except Exception as exc:
-                log.warning("Error adding member %s to %s: %s",
-                            new_member_dn, new_group_dn, exc)
+                if "entryAlreadyExists" in str(exc):
+                    log.debug("Member already in group, skipping: %s -> %s", new_member_dn, new_group_dn)
+                else:
+                    log.warning("Error adding member %s to %s: %s",
+                                new_member_dn, new_group_dn, exc)
 
     log.info("Restored %d / %d groups", len(group_dn_map), len(groups))
     return group_dn_map

@@ -126,8 +126,9 @@ Objects are created in strict dependency order to ensure references resolve corr
 Common flags:
 
 - `-s, --server` — DC hostname or IP
+- `-P, --port` — LDAP port (default: 389)
 - `-u, --username` — bind username (UPN or `DOMAIN\user`)
-- `-pw, --password` — bind password (prompts if omitted)
+- `-p, --password` — bind password (prompts if omitted)
 - `--ssl` — use LDAPS (port 636)
 - `-v, --verbose` — debug logging
 
@@ -156,7 +157,3 @@ ad_cain/
 ├── sysvol/             # GPO file read/write
 └── utils/              # DN parsing, errors, encoders
 ```
-
-## License
-
-MIT

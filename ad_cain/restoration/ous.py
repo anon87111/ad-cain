@@ -43,7 +43,11 @@ def restore_ous(
             else:
                 log.error("Failed to create OU %s: %s", new_dn, conn.result["description"])
         except Exception as exc:
-            log.error("Error creating OU %s: %s", new_dn, exc)
+            if "entryAlreadyExists" in str(exc):
+                dn_map[ou.distinguished_name] = new_dn
+                log.warning("OU already exists, skipping: %s", new_dn)
+            else:
+                log.error("Error creating OU %s: %s", new_dn, exc)
 
     log.info("Restored %d / %d OUs", len(dn_map), len(ous))
     return dn_map
