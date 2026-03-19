@@ -24,10 +24,10 @@ def cli():
 
 @cli.command()
 @click.option("--server", "-s", required=True, help="Domain Controller hostname or IP.")
-@click.option("--port", "-p", default=389, type=int, help="LDAP port (default: 389).")
+@click.option("--port", "-P", default=389, type=int, help="LDAP port (default: 389).")
 @click.option("--ssl", is_flag=True, help="Use LDAPS (port 636).")
 @click.option("--username", "-u", prompt=True, help="Bind username (UPN or DOMAIN\\user).")
-@click.option("--password", "-pw", prompt=True, hide_input=True, help="Bind password.")
+@click.option("--password", "-p", prompt=True, hide_input=True, help="Bind password.")
 @click.option("--output", "-o", required=True, type=click.Path(), help="Output JSON file path.")
 @click.option("--sysvol", type=click.Path(exists=True), default=None,
               help="Path to mounted SYSVOL share (for GPO file export).")
@@ -78,10 +78,10 @@ def export(server, port, ssl, username, password, output, sysvol,
 
 @cli.command()
 @click.option("--server", "-s", required=True, help="Target Domain Controller.")
-@click.option("--port", "-p", default=389, type=int, help="LDAP port.")
+@click.option("--port", "-P", default=389, type=int, help="LDAP port.")
 @click.option("--ssl", is_flag=True, help="Use LDAPS.")
 @click.option("--username", "-u", prompt=True, help="Bind username.")
-@click.option("--password", "-pw", prompt=True, hide_input=True, help="Bind password.")
+@click.option("--password", "-p", prompt=True, hide_input=True, help="Bind password.")
 @click.option("--state-file", "-f", required=True, type=click.Path(exists=True),
               help="State JSON file to restore from.")
 @click.option("--sysvol", type=click.Path(exists=True), default=None,

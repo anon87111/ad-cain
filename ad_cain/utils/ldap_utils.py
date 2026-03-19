@@ -48,6 +48,31 @@ def uac_flags(uac_value: int) -> dict[str, bool]:
     return flags
 
 
+def to_datetime(val) -> datetime | None:
+    """Coerce an LDAP time value to datetime.
+
+    ldap3 may return datetime objects, FILETIME ints, or strings
+    depending on server schema and connection settings.
+    """
+    if val is None:
+        return None
+    if isinstance(val, datetime):
+        if val.tzinfo is None:
+            return val.replace(tzinfo=timezone.utc)
+        return val
+    try:
+        ival = int(val)
+        return filetime_to_datetime(ival)
+    except (TypeError, ValueError):
+        pass
+    if isinstance(val, str) and val:
+        try:
+            return datetime.fromisoformat(val)
+        except ValueError:
+            pass
+    return None
+
+
 def get_attr(entry: dict, name: str, default=None):
     """Safely extract a single-value attribute from an LDAP entry."""
     val = entry.get(name)

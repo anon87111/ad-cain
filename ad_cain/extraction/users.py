@@ -6,7 +6,7 @@ from ldap3 import Connection, SUBTREE
 
 from ad_cain.models.user import ADUser, PasswordPolicy
 from ad_cain.logger import get_logger
-from ad_cain.utils.ldap_utils import get_attr, get_attr_list, filetime_to_datetime
+from ad_cain.utils.ldap_utils import get_attr, get_attr_list, to_datetime
 
 log = get_logger("extraction.users")
 
@@ -38,10 +38,10 @@ def extract_all_users(conn: Connection, base_dn: str) -> list[ADUser]:
         uac = int(get_attr(attrs, "userAccountControl", 512))
         enabled = not bool(uac & 0x0002)
 
-        pwd_last_set = get_attr(attrs, "pwdLastSet", 0)
-        pwd_dt = filetime_to_datetime(int(pwd_last_set)) if pwd_last_set else None
-        acct_expires_raw = get_attr(attrs, "accountExpires", 0)
-        acct_expires_dt = filetime_to_datetime(int(acct_expires_raw)) if acct_expires_raw else None
+        pwd_last_set = get_attr(attrs, "pwdLastSet", None)
+        pwd_dt = to_datetime(pwd_last_set)
+        acct_expires_raw = get_attr(attrs, "accountExpires", None)
+        acct_expires_dt = to_datetime(acct_expires_raw)
 
         user = ADUser(
             distinguished_name=dn,
@@ -57,7 +57,7 @@ def extract_all_users(conn: Connection, base_dn: str) -> list[ADUser]:
             password_policy=PasswordPolicy(
                 last_set=pwd_dt.isoformat() if pwd_dt else "",
                 never_expires=bool(uac & 0x10000),
-                must_change_at_logon=(pwd_last_set == 0),
+                must_change_at_logon=(pwd_last_set == 0 or pwd_last_set is None),
                 account_expires=acct_expires_dt.isoformat() if acct_expires_dt else None,
             ),
             group_memberships=get_attr_list(attrs, "memberOf"),
